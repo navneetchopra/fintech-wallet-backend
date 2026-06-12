@@ -22,7 +22,11 @@ const registerUser = async (req, res) => {
              RETURNING *`,
             [name, email, hashedpassword]
         );
-
+        await pool.query(
+            `INSERT INTO wallets(user_id)
+            VALUES($1)`,
+            [result.rows[0].id]
+        );
         res.status(201).json({
             success: true,
             message: "User registered successfully",
@@ -214,11 +218,145 @@ const loginUser = async (req, res) => {
     }
 
 };
+const addMoney = async (req, res) => {
+
+    try {
+
+        const { user_id, amount } = req.body;
+
+        if (user_id == null || amount == null) {
+
+            return res.status(400).json({
+                success: false,
+                message: "User id and amount required"
+            });
+
+        }
+
+        const result = await pool.query(
+            `UPDATE wallets
+             SET balance = balance + $1
+             WHERE user_id = $2
+             RETURNING *`,
+            [amount, user_id]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Money added successfully",
+            wallet: result.rows[0]
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    }
+
+};
+const sendMoney = async (req, res) => {
+
+    const client = await pool.connect();
+
+    try {
+
+        const { sender_id, receiver_id, amount } = req.body;
+
+        await client.query("BEGIN");
+        const senderWallet = await client.query(
+    `SELECT * FROM wallets
+     WHERE user_id = $1`,
+    [sender_id]
+);
+
+if (senderWallet.rows.length === 0) {
+
+    return res.status(404).json({
+        success: false,
+        message: "Sender wallet not found"
+    });
+
+}
+
+const balance = Number(senderWallet.rows[0].balance);
+
+if (balance < amount) {
+
+    return res.status(400).json({
+        success: false,
+        message: "Insufficient balance"
+    });
+
+}
+const receiverWallet = await client.query(
+    `SELECT * FROM wallets
+     WHERE user_id = $1`,
+    [receiver_id]
+);
+
+if (receiverWallet.rows.length === 0) {
+
+    return res.status(404).json({
+        success: false,
+        message: "Receiver wallet not found"
+    });
+
+}
+await client.query(
+    `UPDATE wallets
+     SET balance = balance - $1
+     WHERE user_id = $2`,
+    [amount, sender_id]
+);
+await client.query(
+    `UPDATE wallets
+     SET balance = balance + $1
+     WHERE user_id = $2`,
+    [amount, receiver_id]
+);
+await client.query(
+    `INSERT INTO transactions
+     (sender_id, receiver_id, amount)
+     VALUES ($1, $2, $3)`,
+    [sender_id, receiver_id, amount]
+);
+await client.query("COMMIT");
+
+        res.status(200).json({
+            success: true,
+            message: "Money transferred successfully"
+        });
+
+    } catch (error) {
+
+        await client.query("ROLLBACK");
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+
+    } finally {
+
+        client.release();
+
+    }
+
+};
 module.exports = {
     registerUser,
     getUsers,
     getSingleUser,
     deleteUser,
     updateUser,
-    loginUser
+    loginUser,
+    addMoney,
+    sendMoney
 };
