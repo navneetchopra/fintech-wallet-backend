@@ -2,13 +2,13 @@ const express = require("express");
 
 const {
     registerUser,
-    getUsers,
-    getSingleUser,
-    deleteUser,
-    updateUser,
+    updateProfile,
     loginUser,
     addMoney,
-    sendMoney
+    sendMoney,
+    getTransactions,
+    checkBalance,
+    getMyProfile
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -25,15 +25,19 @@ router.post("/login", loginUser);
 
 // PROTECTED ROUTES
 
-router.get("/users", authMiddleware, getUsers);
+// router.get("/users", authMiddleware, getUsers);
 
-router.get("/users/:id", authMiddleware, getSingleUser);
+// router.get("/users/:id", authMiddleware, getSingleUser);
 
-router.delete("/users/:id", authMiddleware, deleteUser);
+// router.delete("/profile", authMiddleware, deleteProfile);
 
-router.put("/users/:id", authMiddleware, updateUser);
+router.put("/profile", authMiddleware,updateProfile);
 
 router.post("/add-money", authMiddleware, addMoney);
 
 router.post("/send-money", authMiddleware, sendMoney);
+
+router.get("/transactions", authMiddleware, getTransactions);
+router.get("/balance", authMiddleware, checkBalance);
+router.get("/me",authMiddleware,getMyProfile);
 module.exports = router;
