@@ -1,9 +1,12 @@
-const {Pool}=require("pg");
-const pool =new Pool({
-    user:"postgres",
-    host:"localhost",
-    database:"fintech_wallet",
-    password:"Donotshutup@02",
-    port:5432
+const { Pool } = require("pg");
+
+console.log("DB_URL =", process.env.DB_URL);
+
+const pool = new Pool({
+  connectionString: process.env.DB_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
-module.exports=pool;
+
+module.exports = pool;

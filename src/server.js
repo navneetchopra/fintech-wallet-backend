@@ -6,12 +6,13 @@ const pool=require("./config/db");
 app.use(express.json());
 app.use("/api/auth",authRoutes);
 
-pool.connect().then(()=>{
+pool.connect()
+  .then(() => {
     console.log("PostgreSQL connected success");
-})
-.catch((err)=>{
-    console.log("Database Connection error:",err);
-});
+  })
+  .catch((err) => {
+    console.log("FULL ERROR =>", err);
+  });
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

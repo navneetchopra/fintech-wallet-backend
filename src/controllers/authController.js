@@ -204,8 +204,8 @@ const loginUser = async (req, res) => {
 };
 const addMoney = async (req, res) => {
   try {
-    const userId=req.user.id;
-    const {amount } = req.body;
+    const userId = req.user.id;
+    const { amount } = req.body;
 
     if (amount == null) {
       return res.status(400).json({
@@ -224,7 +224,7 @@ const addMoney = async (req, res) => {
              SET balance = balance + $1
              WHERE user_id = $2
              RETURNING *`,
-      [amount, userId]
+      [amount, userId],
     );
 
     res.status(200).json({
@@ -399,14 +399,14 @@ const getMyProfile = async (req, res) => {
 
     const result = await pool.query(
       `SELECT
-u.id,
-u.name,
-u.email,
-w.balance
-FROM users u
-JOIN wallets w
-ON u.id = w.user_id
-WHERE u.id = $1;`,
+       u.id,
+       u.name,
+       u.email,
+       w.balance
+       FROM users u
+       JOIN wallets w
+       ON u.id = w.user_id
+       WHERE u.id = $1;`,
       [userId],
     );
 
