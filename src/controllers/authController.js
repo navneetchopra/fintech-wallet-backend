@@ -210,7 +210,7 @@ const addMoney = async (req, res) => {
     if (amount == null) {
       return res.status(400).json({
         success: false,
-        message: "User id and amount required",
+        message: "amount required",
       });
     }
     if (amount <= 0) {
