@@ -5,7 +5,13 @@ const app=express();
 const pool=require("./config/db");
 app.use(express.json());
 app.use("/api/auth",authRoutes);
-
+app.get("/", (req, res) => {
+  res.status(200).json({
+    app: "Fintech Wallet API",
+    status: "Running",
+    version: "1.0.0",
+  });
+});
 pool.connect()
   .then(() => {
     console.log("PostgreSQL connected success");
