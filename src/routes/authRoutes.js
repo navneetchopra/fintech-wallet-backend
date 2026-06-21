@@ -1,4 +1,12 @@
 const express = require("express");
+const validate = require("../middlewares/validate");
+
+const {
+  registerSchema,
+  loginSchema,
+  addMoneySchema,
+  sendMoneySchema,
+} = require("../validation/authValidation");
 
 const {
     registerUser,
@@ -18,9 +26,9 @@ const router = express.Router();
 
 // PUBLIC ROUTES
 
-router.post("/register", registerUser);
+router.post("/register",validate(registerSchema), registerUser);
 
-router.post("/login", loginUser);
+router.post("/login",validate(loginSchema),loginUser);
 
 
 // PROTECTED ROUTES
@@ -33,9 +41,9 @@ router.post("/login", loginUser);
 
 router.put("/profile", authMiddleware,updateProfile);
 
-router.post("/add-money", authMiddleware, addMoney);
+router.post("/add-money", authMiddleware,validate(addMoneySchema), addMoney);
 
-router.post("/send-money", authMiddleware, sendMoney);
+router.post("/send-money", authMiddleware,validate(sendMoneySchema), sendMoney);
 
 router.get("/transactions", authMiddleware, getTransactions);
 router.get("/balance", authMiddleware, checkBalance);
